@@ -160,17 +160,25 @@ async function retrieveOrderID() {
 function incrementOrderId(orderID) {
   // Extract the parts of the order ID
   const prefix = orderID.substring(0, 3); // ADL
-  const year = orderID.substring(3, 5); // 24
-  let id = parseInt(orderID.substring(5), 10); // 001, converted to 1
 
-  // Increment the ID
-  id++;
+  const year = new Date().getFullYear() % 100;
+  const previousYear = orderID.substring(3, 5); // 24
+
+  if (previousYear !== year.toString()) {
+    var id = 1
+  }
+  else {
+    var id = parseInt(orderID.substring(5), 10); // 001, converted to 1
+
+    // Increment the ID
+    id++;
+  }
 
   // Format the incremented ID back into the string with leading zeros
   const newId = id.toString().padStart(3, '0');
 
   // Concatenate everything back together
-  return prefix + year + newId; // ADL24002
+  return prefix + year.toString() + newId; // ADL24002
 }
 
 function takeToTheNextPage() {
@@ -1046,12 +1054,21 @@ async function getDynamicOrderID(abbreviation) {
       throw new Error('Network response was not ok.');
     }
     const data = await response.json();
+    const year = new Date().getFullYear() % 100; // Get the last two digits of the current year
 
     let newSequenceNum = 1; // Default sequence number if no previous order exists
     if (data.orderID) {
       const idWithoutYear = data.orderID.slice(abbreviation.length + 2); // Remove abbreviation and year from the ID
-      const lastSequenceNum = parseInt(idWithoutYear, 10); // Parse the numeric part of the sequence
-      newSequenceNum = lastSequenceNum + 1;
+      const previousOrderYear = data.orderID.slice(abbreviation.length, abbreviation.length + 2);
+
+      if (previousOrderYear !== year.toString()) {
+        newSequenceNum = 1;
+      }
+      else {
+        const lastSequenceNum = parseInt(idWithoutYear, 10); // Parse the numeric part of the sequence
+        newSequenceNum = lastSequenceNum + 1;
+      }
+      console.log(newSequenceNum);
       // We are putting it inside the condition is because we wanna make 
       // sure that the first Order Id is 001 no matter what
       let leaveSpaceInput = document.getElementById('leave-space-input').value;
@@ -1062,7 +1079,6 @@ async function getDynamicOrderID(abbreviation) {
 
     }
 
-    const year = new Date().getFullYear() % 100; // Get the last two digits of the current year
     const formattedSequenceNum = `${newSequenceNum}`.padStart(3, '0');
     // Construct the new order ID
     const orderId = `${abbreviation}${year}${formattedSequenceNum}`;

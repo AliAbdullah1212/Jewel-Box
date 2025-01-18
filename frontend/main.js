@@ -28,7 +28,7 @@ if (!fs.existsSync(jewelBoxFolderPath)) {
 const versionFilePath = path.join(jewelBoxFolderPath, "version.json");
 // This will create a path to "ipAddress.txt" inside a "JewelBox" directory within the user's home directory
 const ipFilePath = path.join(jewelBoxFolderPath, "ipAddress.txt");
-const SOFTWARE_VERSION = "3.0.0"; // Invoice Printer Selection, Total Price fix
+const SOFTWARE_VERSION = "3.1.0"; // Invoice Printer Selection, Total Price fix
 let runningAsPackaged = false;
 let mainWindow;
 let BASE_URL;
@@ -235,6 +235,8 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 
   mainWindow.on("ready-to-show", () => {
+    mainWindow.webContents.openDevTools();
+
     if (isDev) {
       mainWindow.webContents.openDevTools();
     }
